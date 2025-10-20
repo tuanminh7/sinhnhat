@@ -227,28 +227,88 @@
             giftBox.style.transform = 'scale(1.5)';
             giftBox.style.opacity = '0';
             
-            for(let i = 0; i < 20; i++) {
+            // Tạo máy bay
+            setTimeout(() => {
+                const plane = document.createElement('div');
+                plane.className = 'airplane';
+                plane.innerHTML = '✈️';
+                document.body.appendChild(plane);
+                
+                // Sau khi máy bay bay xong, thả thư xuống
                 setTimeout(() => {
-                    const heart = document.createElement('div');
-                    heart.className = 'falling-heart';
-                    const hearts = ['❤️', '💕', '💖', '💗', '💓', '💝', '💞'];
-                    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-                    heart.style.left = '50%';
-                    heart.style.top = '50%';
-                    heart.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+                    createLetterPieces();
+                    plane.remove();
+                }, 4000);
+            }, 500);
+        }
+
+        function createLetterPieces() {
+            const pieces = 12; // Số mảnh thư
+            const container = document.createElement('div');
+            container.className = 'letter-pieces-container';
+            document.body.appendChild(container);
+            
+            // Tạo các mảnh thư rơi xuống
+            for(let i = 0; i < pieces; i++) {
+                setTimeout(() => {
+                    const piece = document.createElement('div');
+                    piece.className = 'letter-piece';
+                    piece.style.left = (Math.random() * 80 + 10) + '%';
+                    piece.style.top = '-100px';
+                    piece.style.animationDelay = (i * 0.1) + 's';
                     
-                    const angle = (Math.PI * 2 * i) / 20;
-                    const velocity = Math.random() * 200 + 150;
-                    heart.style.setProperty('--tx', Math.cos(angle) * velocity + 'px');
-                    heart.style.setProperty('--ty', Math.sin(angle) * velocity + 'px');
-                    heart.style.animation = 'giftExplosion 1.5s ease-out forwards';
+                    // Màu sắc ngẫu nhiên cho mảnh thư
+                    const colors = ['#ffb3d9', '#ff9ec5', '#ffc9e3', '#ffe0f0'];
+                    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
                     
-                    document.body.appendChild(heart);
-                    setTimeout(() => heart.remove(), 1500);
-                }, i * 30);
+                    container.appendChild(piece);
+                }, i * 100);
             }
             
-            setTimeout(() => switchStage('stage4'), 800);
+            // Sau khi tất cả mảnh rơi xuống, ghép lại
+            setTimeout(() => {
+                assembleLetterPieces(container);
+            }, pieces * 100 + 2000);
+        }
+
+        function assembleLetterPieces(container) {
+            const pieces = container.querySelectorAll('.letter-piece');
+            
+            // Tạo vị trí trung tâm để ghép
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            pieces.forEach((piece, index) => {
+                setTimeout(() => {
+                    piece.style.animation = 'none';
+                    piece.style.transition = 'all 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                    
+                    // Tính vị trí ghép theo lưới 3x4
+                    const row = Math.floor(index / 4);
+                    const col = index % 4;
+                    const pieceSize = 80;
+                    
+                    piece.style.left = (centerX - 160 + col * pieceSize) + 'px';
+                    piece.style.top = (centerY - 120 + row * pieceSize) + 'px';
+                    piece.style.transform = 'rotate(0deg) scale(1)';
+                    piece.style.opacity = '1';
+                }, index * 80);
+            });
+            
+            // Sau khi ghép xong, chuyển sang thiệp
+            setTimeout(() => {
+                container.remove();
+                
+                // Tạo hiệu ứng flash trắng
+                const flash = document.createElement('div');
+                flash.className = 'white-flash';
+                document.body.appendChild(flash);
+                
+                setTimeout(() => {
+                    flash.remove();
+                    switchStage('stage4');
+                }, 500);
+            }, pieces.length * 80 + 1200);
         }
 
         function createFallingHearts() {
